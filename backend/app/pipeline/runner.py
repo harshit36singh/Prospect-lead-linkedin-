@@ -11,6 +11,8 @@ from app.models.company import Contact
 from app.models.icp import Icp
 from app.models.pipeline_run import PipelineRun
 from app.schemas.icp import IcpRead
+from app.verification.email_verifier import verify_email
+from app.verification.phone_verifier import verify_phone
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ def run_pipeline(pipeline_run_id: int) -> None:
         db.commit()
 
         enrichment = PatternEnrichmentProvider()
-        contacts_found = 0
+        new_contacts: list[Contact] = []
         for discovered, company in companies:
             people = source.find_people(discovered, icp)
             for person in people:
@@ -80,11 +82,18 @@ def run_pipeline(pipeline_run_id: int) -> None:
                     phone_confidence=enrichment_result.phone_confidence,
                 )
                 db.add(contact)
-                contacts_found += 1
+                new_contacts.append(contact)
         db.commit()
 
-        run.contacts_found = contacts_found
-        run.stage = "enrichment"
+        run.contacts_found = len(new_contacts)
+        run.stage = "verification"
+        db.commit()
+
+        for contact in new_contacts:
+            email_result = verify_email(contact.email)
+            phone_result = verify_phone(contact.phone)
+            contact.email_verification_status = email_result.status
+            contact.phone_verification_status = phone_result.status
         db.commit()
 
         run.stage = "done"

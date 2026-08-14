@@ -194,3 +194,59 @@ button:disabled {
   font-size: 0.8rem;
   color: #666;
 }
+
+.app-nav {
+  display: flex;
+  gap: 1rem;
+}
+.app-nav .link-button {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.leads-filters {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+.leads-filters select,
+.leads-filters input {
+  padding: 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.leads-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.leads-table th,
+.leads-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.85rem;
+}
+
+.grade-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.grade-hot {
+  background: #ffe1d6;
+  color: #c8471f;
+}
+.grade-warm {
+  background: #fff3cd;
+  color: #8a6300;
+}
+.grade-cold {
+  background: #e2e6ea;
+  color: #495057;
+}

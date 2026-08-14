@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.database import SessionLocal
 from app.dedupe.deduper import upsert_company
 from app.discovery.registry import get_discovery_source
+from app.enrichment.pattern_provider import PatternEnrichmentProvider
 from app.models.company import Contact
 from app.models.icp import Icp
 from app.models.pipeline_run import PipelineRun
@@ -59,10 +60,12 @@ def run_pipeline(pipeline_run_id: int) -> None:
         run.stage = "find_people"
         db.commit()
 
+        enrichment = PatternEnrichmentProvider()
         contacts_found = 0
         for discovered, company in companies:
             people = source.find_people(discovered, icp)
             for person in people:
+                enrichment_result = enrichment.enrich(person, discovered)
                 contact = Contact(
                     company_id=company.id,
                     full_name=person.full_name,
@@ -70,12 +73,20 @@ def run_pipeline(pipeline_run_id: int) -> None:
                     location=person.location,
                     source=person.source,
                     source_ref=person.source_ref,
+                    email=enrichment_result.email,
+                    email_confidence=enrichment_result.email_confidence,
+                    email_source=enrichment_result.email_source,
+                    phone=enrichment_result.phone,
+                    phone_confidence=enrichment_result.phone_confidence,
                 )
                 db.add(contact)
                 contacts_found += 1
         db.commit()
 
         run.contacts_found = contacts_found
+        run.stage = "enrichment"
+        db.commit()
+
         run.stage = "done"
         run.status = "completed"
         run.finished_at = _utcnow()

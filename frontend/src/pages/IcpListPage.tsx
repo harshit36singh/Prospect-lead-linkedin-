@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
-import type { Icp } from "../types";
+import type { Icp, PipelineRun } from "../types";
 
 interface IcpListPageProps {
   onNew: () => void;
   onEdit: (icp: Icp) => void;
+  onRunStarted: (runId: number) => void;
 }
 
-export function IcpListPage({ onNew, onEdit }: IcpListPageProps) {
+export function IcpListPage({ onNew, onEdit, onRunStarted }: IcpListPageProps) {
   const [icps, setIcps] = useState<Icp[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [runningIcpId, setRunningIcpId] = useState<number | null>(null);
 
   function load() {
     setLoading(true);
@@ -29,6 +31,18 @@ export function IcpListPage({ onNew, onEdit }: IcpListPageProps) {
     if (!confirm("Delete this ICP?")) return;
     await api.delete(`/api/icps/${id}`);
     load();
+  }
+
+  async function handleRun(icpId: number) {
+    setRunningIcpId(icpId);
+    try {
+      const run = await api.post<PipelineRun>("/api/pipeline/runs", { icp_id: icpId });
+      onRunStarted(run.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start pipeline run.");
+    } finally {
+      setRunningIcpId(null);
+    }
   }
 
   if (loading) return <p>Loading ICPs...</p>;
@@ -70,6 +84,13 @@ export function IcpListPage({ onNew, onEdit }: IcpListPageProps) {
                 <td>{icp.technologies.join(", ")}</td>
                 <td>{icp.target_titles.join(", ")}</td>
                 <td className="row-actions">
+                  <button
+                    type="button"
+                    onClick={() => handleRun(icp.id)}
+                    disabled={runningIcpId === icp.id}
+                  >
+                    {runningIcpId === icp.id ? "Starting..." : "Run Pipeline"}
+                  </button>
                   <button type="button" onClick={() => onEdit(icp)}>
                     Edit
                   </button>

@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { api } from "./api/client";
 import { IcpListPage } from "./pages/IcpListPage";
 import { IcpFormPage } from "./pages/IcpFormPage";
+import { PipelineRunPage } from "./pages/PipelineRunPage";
 import type { Icp } from "./types";
 import "./App.css";
 
-type View = { name: "icps" } | { name: "icp-form"; editing: Icp | null };
+type View =
+  | { name: "icps" }
+  | { name: "icp-form"; editing: Icp | null }
+  | { name: "pipeline-run"; runId: number };
 
 function App() {
   const [apiStatus, setApiStatus] = useState<"checking" | "ok" | "error">("checking");
@@ -30,10 +34,18 @@ function App() {
           <IcpListPage
             onNew={() => setView({ name: "icp-form", editing: null })}
             onEdit={(icp) => setView({ name: "icp-form", editing: icp })}
+            onRunStarted={(runId) => setView({ name: "pipeline-run", runId })}
           />
         )}
         {view.name === "icp-form" && (
           <IcpFormPage editing={view.editing} onDone={() => setView({ name: "icps" })} />
+        )}
+        {view.name === "pipeline-run" && (
+          <PipelineRunPage
+            runId={view.runId}
+            onBack={() => setView({ name: "icps" })}
+            onViewLeads={() => setView({ name: "icps" })}
+          />
         )}
       </main>
     </div>

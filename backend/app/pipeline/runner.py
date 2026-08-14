@@ -9,8 +9,10 @@ from app.discovery.registry import get_discovery_source
 from app.enrichment.pattern_provider import PatternEnrichmentProvider
 from app.models.company import Contact
 from app.models.icp import Icp
+from app.models.lead import Lead
 from app.models.pipeline_run import PipelineRun
 from app.schemas.icp import IcpRead
+from app.scoring.scorer import score_lead
 from app.verification.email_verifier import verify_email
 from app.verification.phone_verifier import verify_phone
 
@@ -64,6 +66,7 @@ def run_pipeline(pipeline_run_id: int) -> None:
 
         enrichment = PatternEnrichmentProvider()
         new_contacts: list[Contact] = []
+        company_by_id = {company.id: company for _, company in companies}
         for discovered, company in companies:
             people = source.find_people(discovered, icp)
             for person in people:
@@ -96,6 +99,27 @@ def run_pipeline(pipeline_run_id: int) -> None:
             contact.phone_verification_status = phone_result.status
         db.commit()
 
+        run.stage = "scoring"
+        db.commit()
+
+        leads_created = 0
+        for contact in new_contacts:
+            company = company_by_id[contact.company_id]
+            breakdown = score_lead(company, contact, icp_row)
+            lead = Lead(
+                pipeline_run_id=run.id,
+                icp_id=icp_row.id,
+                company_id=company.id,
+                contact_id=contact.id,
+                score=breakdown.total,
+                grade=breakdown.grade,
+                score_breakdown=breakdown.as_dict(),
+            )
+            db.add(lead)
+            leads_created += 1
+        db.commit()
+
+        run.leads_created = leads_created
         run.stage = "done"
         run.status = "completed"
         run.finished_at = _utcnow()

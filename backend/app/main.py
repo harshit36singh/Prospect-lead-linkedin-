@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import Base, engine
-from app.routers import health, icps, pipeline
+from app.routers import health, icps, leads, pipeline
 
 app = FastAPI(title="Prospect Lead API")
 
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(icps.router)
 app.include_router(pipeline.router)
+app.include_router(leads.router)
 
 
 @app.on_event("startup")

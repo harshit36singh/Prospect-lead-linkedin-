@@ -74,6 +74,15 @@ class GitHubClient:
                 f"Set PROSPECTLEAD_GITHUB_TOKEN in backend/.env to raise the limit to 5000/hr."
             )
 
+        # GitHub's secondary/abuse rate limit returns 429 (distinct from the
+        # primary limit's 403+remaining=0) when requests come in too fast.
+        if response.status_code == 429:
+            retry_after = response.headers.get("retry-after", "60")
+            raise GitHubRateLimitError(
+                f"GitHub API secondary rate limit hit; retry-after {retry_after}s. "
+                f"Set PROSPECTLEAD_GITHUB_TOKEN in backend/.env to raise limits."
+            )
+
         if response.status_code >= 500:
             raise GitHubTransientError(f"GitHub API {response.status_code} on {url}")
 

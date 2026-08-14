@@ -32,7 +32,7 @@ See `backend/data/seed_companies.json` to add more companies.
 cd backend
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
-copy .env.example .env   # optional: add GITHUB_TOKEN / GOOGLE_SERVICE_ACCOUNT_JSON
+copy .env.example .env   # optional: add PROSPECTLEAD_GITHUB_TOKEN / GOOGLE_SERVICE_ACCOUNT_JSON
 
 # Frontend
 cd ../frontend

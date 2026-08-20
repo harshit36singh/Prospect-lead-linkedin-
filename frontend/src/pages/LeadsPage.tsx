@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
+import { ExportButtons } from "../components/ExportButtons";
 import type { Grade, Lead } from "../types";
 
 interface LeadsPageProps {
@@ -64,6 +65,8 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
           </label>
         </div>
       </div>
+
+      {runId !== undefined && <ExportButtons runId={runId} />}
 
       {loading && <p>Loading leads...</p>}
       {error && <p className="form-error">{error}</p>}

@@ -261,3 +261,29 @@ button:disabled {
 .duplicate-row {
   opacity: 0.55;
 }
+
+.export-buttons {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.export-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.export-action input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.export-success {
+  color: #1a7a3d;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}

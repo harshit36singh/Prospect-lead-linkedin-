@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 
 from app.database import SessionLocal
-from app.dedupe.deduper import upsert_company
+from app.dedupe.deduper import dedupe_contacts_for_run, upsert_company
 from app.discovery.registry import get_discovery_source
 from app.enrichment.pattern_provider import PatternEnrichmentProvider
 from app.models.company import Contact
@@ -120,6 +120,11 @@ def run_pipeline(pipeline_run_id: int) -> None:
         db.commit()
 
         run.leads_created = leads_created
+        run.stage = "dedupe"
+        db.commit()
+
+        dedupe_contacts_for_run(db, run.id)
+
         run.stage = "done"
         run.status = "completed"
         run.finished_at = _utcnow()

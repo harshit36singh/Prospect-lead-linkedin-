@@ -1,0 +1,90 @@
+<html>
+<head>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  h1 { font-size: 18pt; margin-bottom: 2px; }
+  .subtitle { color: #555; font-size: 9pt; margin-bottom: 14px; }
+  .summary { margin-bottom: 18px; }
+  .summary table { width: 100%; }
+  .summary td { padding: 4px 10px; text-align: center; border: 1px solid #ddd; }
+  .summary .stat-value { font-size: 14pt; font-weight: bold; display: block; }
+  .stat-label { font-size: 8pt; color: #666; }
+
+  .section-title { font-size: 13pt; margin-top: 22px; margin-bottom: 6px; padding: 4px 8px; color: white; }
+  .section-hot { background-color: #c8471f; }
+  .section-warm { background-color: #a67c00; }
+  .section-cold { background-color: #495057; }
+
+  table.leads { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 10px; }
+  table.leads th { background-color: #f0f0f0; text-align: left; padding: 5px 6px; font-size: 8.5pt; border-bottom: 1px solid #ccc; word-wrap: break-word; }
+  table.leads td { padding: 5px 6px; font-size: 8pt; border-bottom: 1px solid #eee; word-wrap: break-word; }
+  .col-score { width: 7%; }
+  .col-company { width: 13%; }
+  .col-industry { width: 13%; }
+  .col-contact { width: 13%; }
+  .col-title { width: 15%; }
+  .col-email { width: 20%; }
+  .col-status { width: 10%; }
+  .col-phone { width: 9%; }
+  .empty-note { color: #888; font-style: italic; font-size: 9pt; }
+  .footer { margin-top: 24px; font-size: 8pt; color: #999; }
+</style>
+</head>
+<body>
+  <h1>Lead Report: {{ icp_name }}</h1>
+  <div class="subtitle">Generated {{ generated_at }}</div>
+
+  <div class="summary">
+    <table>
+      <tr>
+        <td><span class="stat-value">{{ total_leads }}</span><span class="stat-label">Total Leads</span></td>
+        <td><span class="stat-value">{{ hot_leads|length }}</span><span class="stat-label">Hot</span></td>
+        <td><span class="stat-value">{{ warm_leads|length }}</span><span class="stat-label">Warm</span></td>
+        <td><span class="stat-value">{{ cold_leads|length }}</span><span class="stat-label">Cold</span></td>
+      </tr>
+    </table>
+  </div>
+
+  {% for section_title, section_class, section_leads in [
+      ("Hot Leads", "section-hot", hot_leads),
+      ("Warm Leads", "section-warm", warm_leads),
+      ("Cold Leads", "section-cold", cold_leads),
+  ] %}
+    <div class="section-title {{ section_class }}">{{ section_title }} ({{ section_leads|length }})</div>
+    {% if section_leads %}
+    <table class="leads">
+      <thead>
+        <tr>
+          <th class="col-score">Score</th>
+          <th class="col-company">Company</th>
+          <th class="col-industry">Industry</th>
+          <th class="col-contact">Contact</th>
+          <th class="col-title">Title</th>
+          <th class="col-email">Email</th>
+          <th class="col-status">Status</th>
+          <th class="col-phone">Phone</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in section_leads %}
+        <tr>
+          <td class="col-score">{{ lead.score }}</td>
+          <td class="col-company">{{ lead.company.name }}</td>
+          <td class="col-industry">{{ lead.company.industry }}</td>
+          <td class="col-contact">{{ lead.contact.full_name }}</td>
+          <td class="col-title">{{ lead.contact.title }}</td>
+          <td class="col-email">{{ lead.contact.email or "-" }}</td>
+          <td class="col-status">{{ lead.contact.email_verification_status }}</td>
+          <td class="col-phone">{{ lead.contact.phone or "-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-note">No {{ section_title|lower }} in this report.</div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="footer">Prospect Lead &mdash; generated locally from real, publicly-sourced data. Emails marked "pattern_guess" are inferred, not confirmed.</div>
+</body>
+</html>

@@ -58,7 +58,11 @@ function App() {
           />
         )}
         {view.name === "leads" && (
-          <LeadsPage runId={view.runId} onBack={() => setView({ name: "icps" })} />
+          <LeadsPage
+            runId={view.runId}
+            onBack={() => setView({ name: "icps" })}
+            onRunStarted={(runId) => setView({ name: "pipeline-run", runId })}
+          />
         )}
       </main>
     </div>

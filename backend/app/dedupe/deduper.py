@@ -25,6 +25,7 @@ def normalize_domain(raw: str) -> str:
 
 def normalize_company_name(raw: str) -> str:
     name = raw.strip().lower()
+    name = re.sub(r"[,.]", " ", name)
     name = _LEGAL_SUFFIXES.sub("", name)
     return re.sub(r"\s+", " ", name).strip()
 

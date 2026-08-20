@@ -250,3 +250,14 @@ button:disabled {
   background: #e2e6ea;
   color: #495057;
 }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.duplicate-row {
+  opacity: 0.55;
+}

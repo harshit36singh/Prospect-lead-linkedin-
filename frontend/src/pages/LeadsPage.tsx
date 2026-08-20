@@ -15,12 +15,14 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [gradeFilter, setGradeFilter] = useState<Grade | "">("");
   const [minScore, setMinScore] = useState<number | "">("");
+  const [showDuplicates, setShowDuplicates] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (runId !== undefined) params.set("run_id", String(runId));
     if (gradeFilter) params.set("grade", gradeFilter);
     if (minScore !== "") params.set("min_score", String(minScore));
+    if (showDuplicates) params.set("include_duplicates", "true");
 
     setLoading(true);
     api
@@ -28,7 +30,7 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
       .then(setLeads)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load leads."))
       .finally(() => setLoading(false));
-  }, [runId, gradeFilter, minScore]);
+  }, [runId, gradeFilter, minScore, showDuplicates]);
 
   return (
     <div className="leads-page">
@@ -52,6 +54,14 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
             value={minScore}
             onChange={(e) => setMinScore(e.target.value === "" ? "" : Number(e.target.value))}
           />
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={showDuplicates}
+              onChange={(e) => setShowDuplicates(e.target.checked)}
+            />
+            Show duplicates
+          </label>
         </div>
       </div>
 
@@ -71,11 +81,12 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
               <th>Email</th>
               <th>Email status</th>
               <th>Phone</th>
+              {showDuplicates && <th>Duplicate</th>}
             </tr>
           </thead>
           <tbody>
             {leads.map((lead) => (
-              <tr key={lead.id}>
+              <tr key={lead.id} className={lead.is_duplicate ? "duplicate-row" : ""}>
                 <td>{lead.score}</td>
                 <td>
                   <span className={`grade-badge grade-${lead.grade.toLowerCase()}`}>{lead.grade}</span>
@@ -86,6 +97,7 @@ export function LeadsPage({ runId, onBack }: LeadsPageProps) {
                 <td>{lead.contact.email ?? "—"}</td>
                 <td>{lead.contact.email_verification_status}</td>
                 <td>{lead.contact.phone ?? "—"}</td>
+                {showDuplicates && <td>{lead.is_duplicate ? "Yes" : ""}</td>}
               </tr>
             ))}
           </tbody>
